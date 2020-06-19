@@ -68,63 +68,78 @@ A = TotalApar/(coverage/100)
 Asize = np.sqrt(A)
 Gsize = round(Asize) *10
 
-"""A 2D array of random x-y coordinates for N particles is generated."""
-Positions = np.random.rand(2,N)*Gsize
+""" Creates a loop around the simulation that allows for multiple simulations of 2000 particles"""
+AvgDists=[]
+StdDevs=[]
+TotalSmallDists=[]
+for i in range(5):
 
-"""The positions are filtered to avoid boundary effects. Any positions that lie
- more than 30 nm (300 Å) from the edge of the simulated area are saved into the
- X-Y lists. These positions are the ones that will be used to find the mean
- interparticle distance."""
-(X,Y) = BoundaryFilter(Positions, Gsize, 30)
+    """A 2D array of random x-y coordinates for N particles is generated."""
+    Positions = np.random.rand(2,N)*Gsize
 
-"""Finds the distances between the particles and returns them in a 2D array."""
-Distances = FindDistances(X, Y, Positions, N)
+    """The positions are filtered to avoid boundary effects. Any positions that lie
+    more than 30 nm (300 Å) from the edge of the simulated area are saved into the
+    X-Y lists. These positions are the ones that will be used to find the mean
+    interparticle distance."""
+    (X,Y) = BoundaryFilter(Positions, Gsize, 30)
 
-
-
-
-
-
-
-"""Runs through each row in Distances and finds the smallest nonzero distance.
-Each row contains the distances from one particle to all others. Thus it finds
-the smallest interparticle distance for all particles."""
-SmallDist = []
-for i, a in enumerate(Distances):
-    SmallDist.append(np.min(a[np.nonzero(a)]))
-
-"""Convert distances back to nanometers."""
-SmallDist[:] = [x/10 for x in SmallDist]
-
-"""Find the edge to edge interparticle distance instead of center to center."""
-SmallDist[:] = [x-Psize for x in SmallDist]
-
-"""Copy the absolute distances before removing negatives. Not used for anything
-currently, but can be interesting for other purposes."""
-SmallDistNeg=SmallDist
-
-"""Convert to numpy array and set all distances smaller than 0 to 0 since for
-the current purpose any particle overlapping is the same."""
-SmallDist = np.array(SmallDist)
-SmallDist[SmallDist < 0] = 0
-
-"""Find the mean interparticle distance and the standard deviation.
-Print them out in the terminal."""
-AverageInterparticleDistance = np.mean(SmallDist)
-Std = np.std(SmallDist)
-print(AverageInterparticleDistance, Std)
+    """Finds the distances between the particles and returns them in a 2D array."""
+    Distances = FindDistances(X, Y, Positions, N)
 
 
 
 
 
+    """Runs through each row in Distances and finds the smallest nonzero distance.
+    Each row contains the distances from one particle to all others. Thus it finds
+    the smallest interparticle distance for all particles."""
+    SmallDist = []
+    for i, a in enumerate(Distances):
+        SmallDist.append(np.min(a[np.nonzero(a)]))
+
+    """Convert distances back to nanometers."""
+    SmallDist[:] = [x/10 for x in SmallDist]
+
+    """Find the edge to edge interparticle distance instead of center to center."""
+    SmallDist[:] = [x-Psize for x in SmallDist]
+
+    """Copy the absolute distances before removing negatives. Not used for anything
+    currently, but can be interesting for other purposes."""
+    SmallDistNeg=SmallDist
+
+    """Convert to numpy array and set all distances smaller than 0 to 0 since for
+    the current purpose any particle overlapping is the same."""
+    SmallDist = np.array(SmallDist)
+    SmallDist[SmallDist < 0] = 0
+
+    """Find the mean interparticle distance and the standard deviation.
+    Print them out in the terminal."""
+    AverageInterparticleDistance = np.mean(SmallDist)
+    Std = np.std(SmallDist)
+    print(AverageInterparticleDistance, Std)
+
+    AvgDists.append(AverageInterparticleDistance)
+    StdDevs.append(Std)
+    TotalSmallDists.append(SmallDist)
 
 
+
+TotalSmallDistslist= [item for sublist in TotalSmallDists for item in sublist]
+
+MeanIPD= np.mean(AvgDists)
+IPDStdDev= np.std(AvgDists)
+MeanDistStdDev= np.mean(StdDevs)
+TotalNpar=len(TotalSmallDistslist)
+
+print('Number of Particles included:', TotalNpar, 'nm')
+print( 'The mean interparticle distance is', MeanIPD, \
+'nm. With a standard deviation of', IPDStdDev,'nm.')
+print(' The distribution has a standard deviation of', MeanDistStdDev, 'nm.')
 
 """Creates a histogram of the interparticle distance distribution.
 Note that the bar at 0 may be very large at higher coverages since all negative
 interparticle distances are set to 0."""
-plt.hist(SmallDist,30, edgecolor = 'black')
+plt.hist(TotalSmallDistslist,30, edgecolor = 'black')
 #plt.xlim(0,50)
 #plt.ylim(0,160)
 plt.xlabel('Interparticle Distance [nm]', Fontsize = 18)
