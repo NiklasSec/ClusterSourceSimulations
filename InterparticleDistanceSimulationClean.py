@@ -49,6 +49,14 @@ def FindDistances(FiltDim1, FiltDim2, Unfiltered, Npar):
     Distance = np.sqrt(Distance1**2+Distance2**2)
     return Distance
 
+def SimGrid(NumPar, ParSize, SimCoverage):
+    TotalApar = math.pi*(ParSize/2)**2*NumPar
+    Area = TotalApar/(SimCoverage/100)
+    Asize = np.sqrt(Area)
+    Gridsize = round(Asize)*10
+    return Gridsize
+
+
 
 """Projected coverage in % monolayer."""
 coverage = 0.5
@@ -59,15 +67,15 @@ N=2000
 
 """Calculation of the simulation area from the desired coverage and area
  per particle."""
-Apar = math.pi * (Psize/2)**2
-TotalApar= Apar*N
-A = TotalApar/(coverage/100)
+#Apar = math.pi * (Psize/2)**2
+#TotalApar= Apar*N
+#A = TotalApar/(coverage/100)
 
 """The grid size is set in units of an Å to increase the accuracy of the
  simulation."""
-Asize = np.sqrt(A)
-Gsize = round(Asize) *10
-
+#Asize = np.sqrt(A)
+#Gsize = round(Asize) *10
+Gsize = SimGrid(N, Psize, coverage)
 """ Creates a loop around the simulation that allows for multiple simulations of 2000 particles"""
 AvgDists=[]
 StdDevs=[]
@@ -131,7 +139,7 @@ IPDStdDev= np.std(AvgDists)
 MeanDistStdDev= np.mean(StdDevs)
 TotalNpar=len(TotalSmallDistslist)
 
-print('Number of Particles included:', TotalNpar, 'nm')
+print('Number of Particles included:', TotalNpar)
 print( 'The mean interparticle distance is', MeanIPD, \
 'nm. With a standard deviation of', IPDStdDev,'nm.')
 print(' The distribution has a standard deviation of', MeanDistStdDev, 'nm.')
