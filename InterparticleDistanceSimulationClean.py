@@ -95,7 +95,8 @@ Psize = 3.8
 N=2000
 Gsize = SimGrid(N, Psize, coverage)
 
-""" Creates a loop around the simulation that allows for multiple simulations of 2000 particles"""
+""" Creates a loop around the simulation that allows for multiple simulations
+of 2000 particles"""
 AvgDists=[]
 StdDevs=[]
 TotalSmallDists=[]
@@ -104,16 +105,18 @@ for i in range(5):
     """A 2D array of random x-y coordinates for N particles is generated."""
     Positions = np.random.rand(2,N)*Gsize
 
-    """The positions are filtered to avoid boundary effects. Any positions that lie
-    more than 30 nm (300 Å) from the edge of the simulated area are saved into the
-    X-Y lists. These positions are the ones that will be used to find the mean
-    interparticle distance."""
+    """The positions are filtered to avoid boundary effects. Any positions
+    that lie more than 30 nm (300 Å) from the edge of the simulated area are
+    saved into the X-Y lists. These positions are the ones that will be used
+    to find the mean interparticle distance."""
     (X,Y) = BoundaryFilter(Positions, Gsize, 30)
 
-    """Finds the distances between the particles and returns them in a 2D array."""
+    """Finds the distances between the particles and returns them in a
+     2D array."""
     Distances = FindDistances(X, Y, Positions, N)
 
-    """Finds the smallest distances for each particle and sets all distances below zero to zero."""
+    """Finds the smallest distances for each particle and sets all distances
+     below zero to zero."""
     SmallDist = SmallestDistNonNeg(Distances, Psize)
 
     """Find the mean interparticle distance and the standard deviation.
@@ -153,7 +156,8 @@ plt.tight_layout()
 
 
 """Saves the figure with the given name so it can be used elsewhere."""
-plt.savefig('sim7nm.png', dpi= 1200, format = 'png')
+savename = 'SimofSize{}nmCoverage{}.png'.format(Psize,coverage)
+plt.savefig(savename, dpi= 1200, format = 'png')
 plt.show()
 
 
