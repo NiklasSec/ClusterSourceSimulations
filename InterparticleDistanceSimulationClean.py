@@ -50,11 +50,40 @@ def FindDistances(FiltDim1, FiltDim2, Unfiltered, Npar):
     return Distance
 
 def SimGrid(NumPar, ParSize, SimCoverage):
+    """Calculation of the simulation area from the desired coverage and area
+     per particle."""
     TotalApar = math.pi*(ParSize/2)**2*NumPar
     Area = TotalApar/(SimCoverage/100)
+    """The grid size is set in units of an Å to increase the accuracy of the
+     simulation."""
     Asize = np.sqrt(Area)
     Gridsize = round(Asize)*10
     return Gridsize
+
+def SmallestDistNonNeg(Distances, ParSize):
+    """Runs through each row in Distances and finds the smallest nonzero distance.
+    Each row contains the distances from one particle to all others. Thus it finds
+    the smallest interparticle distance for all particles."""
+    SmallDist = []
+    for a in Distances:
+        SmallDist.append(np.min(a[np.nonzero(a)]))
+
+    """Convert distances back to nanometers."""
+    SmallDist = np.array(SmallDist)
+    SmallDist = SmallDist/10
+
+    """Find the edge to edge interparticle distance instead of center to center."""
+    SmallDist = SmallDist-ParSize
+
+    """Copy the absolute distances before removing negatives. Not used for anything
+    currently, but can be interesting for other purposes."""
+    SmallDistNeg=SmallDist
+
+    """Convert to numpy array and set all distances smaller than 0 to 0 since for
+    the current purpose any particle overlapping is the same."""
+    SmallDist[SmallDist < 0] = 0
+
+    return SmallDist
 
 
 
@@ -64,18 +93,8 @@ coverage = 0.5
 Psize = 3.8
 """Number of particles to include in the simulation."""
 N=2000
-
-"""Calculation of the simulation area from the desired coverage and area
- per particle."""
-#Apar = math.pi * (Psize/2)**2
-#TotalApar= Apar*N
-#A = TotalApar/(coverage/100)
-
-"""The grid size is set in units of an Å to increase the accuracy of the
- simulation."""
-#Asize = np.sqrt(A)
-#Gsize = round(Asize) *10
 Gsize = SimGrid(N, Psize, coverage)
+
 """ Creates a loop around the simulation that allows for multiple simulations of 2000 particles"""
 AvgDists=[]
 StdDevs=[]
@@ -94,31 +113,8 @@ for i in range(5):
     """Finds the distances between the particles and returns them in a 2D array."""
     Distances = FindDistances(X, Y, Positions, N)
 
-
-
-
-
-    """Runs through each row in Distances and finds the smallest nonzero distance.
-    Each row contains the distances from one particle to all others. Thus it finds
-    the smallest interparticle distance for all particles."""
-    SmallDist = []
-    for i, a in enumerate(Distances):
-        SmallDist.append(np.min(a[np.nonzero(a)]))
-
-    """Convert distances back to nanometers."""
-    SmallDist[:] = [x/10 for x in SmallDist]
-
-    """Find the edge to edge interparticle distance instead of center to center."""
-    SmallDist[:] = [x-Psize for x in SmallDist]
-
-    """Copy the absolute distances before removing negatives. Not used for anything
-    currently, but can be interesting for other purposes."""
-    SmallDistNeg=SmallDist
-
-    """Convert to numpy array and set all distances smaller than 0 to 0 since for
-    the current purpose any particle overlapping is the same."""
-    SmallDist = np.array(SmallDist)
-    SmallDist[SmallDist < 0] = 0
+    """Finds the smallest distances for each particle and sets all distances below zero to zero."""
+    SmallDist = SmallestDistNonNeg(Distances, Psize)
 
     """Find the mean interparticle distance and the standard deviation.
     Print them out in the terminal."""
