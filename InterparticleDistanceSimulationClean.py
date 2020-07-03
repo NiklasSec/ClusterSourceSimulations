@@ -52,7 +52,7 @@ def FindDistances(FiltDim1, FiltDim2, Unfiltered, Npar):
 def SimGrid(NumPar, ParSize, SimCoverage):
     TotalApar = math.pi*(ParSize/2)**2*NumPar
     Area = TotalApar/(SimCoverage/100)
-    Asize = np.sqrt(A)
+    Asize = np.sqrt(Area)
     Gridsize = round(Asize)*10
     return Gridsize
 
@@ -139,7 +139,7 @@ IPDStdDev= np.std(AvgDists)
 MeanDistStdDev= np.mean(StdDevs)
 TotalNpar=len(TotalSmallDistslist)
 
-print('Number of Particles included:', TotalNpar, 'nm')
+print('Number of Particles included:', TotalNpar)
 print( 'The mean interparticle distance is', MeanIPD, \
 'nm. With a standard deviation of', IPDStdDev,'nm.')
 print(' The distribution has a standard deviation of', MeanDistStdDev, 'nm.')
