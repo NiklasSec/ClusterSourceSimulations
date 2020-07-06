@@ -13,7 +13,7 @@ Area_of_particle = 4*3.14*(Psize*1e-9/2)**2
 #340 muC per cm^2
 Charge_per_particle = 340e4*Area_of_particle*1e-6
 Total_Theory_Charge = Number_of_particles*Charge_per_particle
-test
+
 
 SmallRaster= 6.592e-6
 LargeRaster= 3.127e-5
