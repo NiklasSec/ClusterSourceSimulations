@@ -3,32 +3,48 @@ import numpy as np
 import math
 from datetime import datetime
 from mpl_toolkits.mplot3d import Axes3D
+from Functions import SimGrid
+from sys import exit
+
 starttime = datetime.now()
+"""Define simulation base parameters, N=number of particles to simulate, Psize=
+particle size, Pmass=particle mass in amu, EA=the electrochemically tested
+area, Loadings=loadings in ng/cm^2 to simulate,
+SC= stripcharge per area [muC/m^2]."""
+N=2000
 Psize = 3.8
+Pmass = 370e3
+EA = 3.14*(0.25)**2
+SC= 340e4
 Loading =  np.array([565, 997, 5000])
 #np.linspace(10, 5000)
-Number_of_particles = Loading*6.022e14/370e3*3.14*(0.25)**2
-Proj_Area_of_particle = 1.134e-17
-Area_of_particle = 4*3.14*(Psize*1e-9/2)**2
-#340 muC per cm^2
-Charge_per_particle = 340e4*Area_of_particle*1e-6
+"""Calculate necessary parameters."""
+Number_of_particles = Loading*6.022e14/Pmass*EA
+Proj_Area_of_particle = math.pi*(Psize*1e-9/2)**2
+Area_of_particle = 4*math.pi*(Psize*1e-9/2)**2
+Charge_per_particle = SC*Area_of_particle*1e-6
 Total_Theory_Charge = Number_of_particles*Charge_per_particle
+SApar= 4*math.pi*(3.8/2)**2
+SAtotal = 2000*SApar
 
-
+"""The raster areas defined to be used to calculate the coverages."""
 SmallRaster= 6.592e-6
 LargeRaster= 3.127e-5
 
+"""Selection of the raster area used."""
 Dep_area = LargeRaster
 
+"""Coverage calculation."""
 Coverages =Number_of_particles*Proj_Area_of_particle/Dep_area*100
 #Coverages = [0.7, 1.0, 2.7, 5.5, 1.0, 2.8, 5.5, 10.9, 10.8, 27.3, 27.4, 55.1, 275.1]
 
-SApar= 4*math.pi*(3.8/2)**2
-SAtotal = 2000*SApar
+
 MR = []
 BMR = []
 BSTD = []
 STD =[]
+"""Simulate each of the coverages calculated above with 5 (for x in range(5))
+repeated simulations of 2000 particles."""
 for cov in Coverages:
     #print(cov)
     #Noverlaps = []
@@ -36,102 +52,28 @@ for cov in Coverages:
     Bratios = []
     #Overlapareas = []
 
-    for x in range(5):
-        # number of simulated particles
-        N = 2000
-        #particle diameter in nm
-
-        Apar = math.pi * (Psize/2)**2
-        TotalApar= Apar*N
-        #simulated area size, used to adjust number of particles in simulation
-        A = TotalApar/(cov/100)
-        Asize = np.sqrt(A)
-        Gsize = round(Asize) *10
+    for repeat in range(5):
+        Gsize = SimGrid(N, Psize, cov)
+        """Generates the x,y positions for all N particles and sets their
+        initial z coordinate to 1."""
         Positions = np.random.rand(2,N)*Gsize
         Z = np.full((N),1)
 
-        for i, a in enumerate(Positions[0]):
-            x, y = 0, 1
-            Distance1 = np.sqrt((Positions[x, i] - Positions[x, :])**2 + (Positions[y, i] - Positions[y, :])**2 + (Z[i]-Z[:])**2)
-            index = np.where(Distance1 < 35)
-            for g in index[0]:
-                if g !=i:
-                    if Z[g]!=Z[i]:
-                        Z[g]=Z[i]
-                        Distance1 = np.sqrt((Positions[x, i] - Positions[x, :])**2 + (Positions[y, i] - Positions[y, :])**2 + (Z[i]-Z[:])**2)
-                    Z[g] = Z[g]+ np.sqrt((Psize*10)**2 - Distance1[g]**2)
-        for i, a in enumerate(Positions[0]):
-            x, y = 0, 1
-            Distance1 = np.sqrt((Positions[x, i] - Positions[x, :])**2 + (Positions[y, i] - Positions[y, :])**2 + (Z[i]-Z[:])**2)
-            index = np.where(Distance1 < 35)
-            for g in index[0]:
-                if g !=i:
-                    if Z[g]!=Z[i]:
-                        Z[g]=Z[i]
-                        Distance1 = np.sqrt((Positions[x, i] - Positions[x, :])**2 + (Positions[y, i] - Positions[y, :])**2 + (Z[i]-Z[:])**2)
-                    Z[g] = Z[g]+ np.sqrt((Psize*10)**2 - Distance1[g]**2)
-        for i, a in enumerate(Positions[0]):
-            x, y = 0, 1
-            Distance1 = np.sqrt((Positions[x, i] - Positions[x, :])**2 + (Positions[y, i] - Positions[y, :])**2 + (Z[i]-Z[:])**2)
-            index = np.where(Distance1 < 35)
-            for g in index[0]:
-                if g !=i:
-                    if Z[g]!=Z[i]:
-                        Z[g]=Z[i]
-                        Distance1 = np.sqrt((Positions[x, i] - Positions[x, :])**2 + (Positions[y, i] - Positions[y, :])**2 + (Z[i]-Z[:])**2)
-                    Z[g] = Z[g]+ np.sqrt((Psize*10)**2 - Distance1[g]**2)
-        for i, a in enumerate(Positions[0]):
-            x, y = 0, 1
-            Distance1 = np.sqrt((Positions[x, i] - Positions[x, :])**2 + (Positions[y, i] - Positions[y, :])**2 + (Z[i]-Z[:])**2)
-            index = np.where(Distance1 < 35)
-            for g in index[0]:
-                if g !=i:
-                    if Z[g]!=Z[i]:
-                        Z[g]=Z[i]
-                        Distance1 = np.sqrt((Positions[x, i] - Positions[x, :])**2 + (Positions[y, i] - Positions[y, :])**2 + (Z[i]-Z[:])**2)
-                    Z[g] = Z[g]+ np.sqrt((Psize*10)**2 - Distance1[g]**2)
-        for i, a in enumerate(Positions[0]):
-            x, y = 0, 1
-            Distance1 = np.sqrt((Positions[x, i] - Positions[x, :])**2 + (Positions[y, i] - Positions[y, :])**2 + (Z[i]-Z[:])**2)
-            index = np.where(Distance1 < 35)
-            for g in index[0]:
-                if g !=i:
-                    if Z[g]!=Z[i]:
-                        Z[g]=Z[i]
-                        Distance1 = np.sqrt((Positions[x, i] - Positions[x, :])**2 + (Positions[y, i] - Positions[y, :])**2 + (Z[i]-Z[:])**2)
-                    Z[g] = Z[g]+ np.sqrt((Psize*10)**2 - Distance1[g]**2)
-        for i, a in enumerate(Positions[0]):
-            x, y = 0, 1
-            Distance1 = np.sqrt((Positions[x, i] - Positions[x, :])**2 + (Positions[y, i] - Positions[y, :])**2 + (Z[i]-Z[:])**2)
-            index = np.where(Distance1 < 35)
-            for g in index[0]:
-                if g !=i:
-                    if Z[g]!=Z[i]:
-                        Z[g]=Z[i]
-                        Distance1 = np.sqrt((Positions[x, i] - Positions[x, :])**2 + (Positions[y, i] - Positions[y, :])**2 + (Z[i]-Z[:])**2)
-                    Z[g] = Z[g]+ np.sqrt((Psize*10)**2 - Distance1[g]**2)
-        for i, a in enumerate(Positions[0]):
-            x, y = 0, 1
-            Distance1 = np.sqrt((Positions[x, i] - Positions[x, :])**2 + (Positions[y, i] - Positions[y, :])**2 + (Z[i]-Z[:])**2)
-            index = np.where(Distance1 < 35)
-            for g in index[0]:
-                if g !=i:
-                    if Z[g]!=Z[i]:
-                        Z[g]=Z[i]
-                        Distance1 = np.sqrt((Positions[x, i] - Positions[x, :])**2 + (Positions[y, i] - Positions[y, :])**2 + (Z[i]-Z[:])**2)
-                    Z[g] = Z[g]+ np.sqrt((Psize*10)**2 - Distance1[g]**2)
-        for i, a in enumerate(Positions[0]):
-            x, y = 0, 1
-            Distance1 = np.sqrt((Positions[x, i] - Positions[x, :])**2 + (Positions[y, i] - Positions[y, :])**2 + (Z[i]-Z[:])**2)
-            index = np.where(Distance1 < 35)
-            for g in index[0]:
-                if g !=i:
-                    if Z[g]!=Z[i]:
-                        Z[g]=Z[i]
-                        Distance1 = np.sqrt((Positions[x, i] - Positions[x, :])**2 + (Positions[y, i] - Positions[y, :])**2 + (Z[i]-Z[:])**2)
-                    Z[g] = Z[g]+ np.sqrt((Psize*10)**2 - Distance1[g]**2)
-
-
+        for loop in range(8):
+            for i, a in enumerate(Positions[0]):
+                x, y = 0, 1
+                Distance1 = np.sqrt((Positions[x, i] - Positions[x, :])**2 \
+                 + (Positions[y, i] - Positions[y, :])**2 + (Z[i]-Z[:])**2)
+                index = np.where(Distance1 < 35)
+                #print(index[0])
+                for g in index[0]:
+                    if g !=i:
+                        if Z[g]!=Z[i]:
+                            Z[g]=Z[i]
+                            Distance1 = np.sqrt((Positions[x, i] - \
+                             Positions[x, :])**2 + (Positions[y, i] - \
+                              Positions[y, :])**2 + (Z[i]-Z[:])**2)
+                        Z[g] = Z[g]+ np.sqrt((Psize*10)**2 - Distance1[g]**2)
 
         counter=[]
         posx =np.array([])
@@ -145,7 +87,8 @@ for cov in Coverages:
             olap =[]
             btom =[]
             x, y = 0, 1
-            Distance1 = np.sqrt((Positions[x, i] - Positions[x, :])**2 + (Positions[y, i] - Positions[y, :])**2 + (Z[i]-Z[:])**2)
+            Distance1 = np.sqrt((Positions[x, i] - Positions[x, :])**2 + \
+             (Positions[y, i] - Positions[y, :])**2 + (Z[i]-Z[:])**2)
             index = np.where(Distance1< Psize*10+5)
             index2 = np.where(Distance1<30)
             if Z[i] < 5:
