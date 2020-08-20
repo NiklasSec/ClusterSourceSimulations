@@ -291,7 +291,7 @@ class IntegrateCurrent(object): # pylint: disable=useless-object-inheritance
             self.plt.plot(self.data[:, 0], self.data[:, 1]/1e-12, 'ro-', markersize=2) ###
             self.plt.xlabel('Time (s)')
             self.plt.ylabel('Current (pA)')
-        
+
         # Select a portion of the data
         if self.time:
             self.data = self.data[np.where(self.data[:, 0] >= self.time[0])]
@@ -324,7 +324,7 @@ if __name__ == '__main__':
 
     #import rcparam
     from cinfdata import Cinfdata
-    db = Cinfdata('omicron', use_caching=False) # pylint: disable=invalid-name
+    db = Cinfdata('STM312', use_caching=False) # pylint: disable=invalid-name
     ID = 15372
     STRING = '\
 TARGET=5.0;\
